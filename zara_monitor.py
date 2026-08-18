@@ -21,7 +21,8 @@ def fetch_products():
     products = {}
     for a in soup.find_all("a", href=True):
         href = a.get("href", "")
-        if ".html" not in href or "/p0" not in href:
+        # Zara product URLs contain '-p0' (not '/p0').
+        if ".html" not in href or "-p0" not in href:
             continue
         url = href if href.startswith("http") else "https://www.zara.com" + href
         name = " ".join(a.get_text(" ", strip=True).split())
