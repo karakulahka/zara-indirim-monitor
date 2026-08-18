@@ -1,6 +1,5 @@
 import json
 import os
-import re
 import smtplib
 import requests
 from bs4 import BeautifulSoup
@@ -8,7 +7,6 @@ from email.message import EmailMessage
 
 ZARA_URL = "https://www.zara.com/tr/tr/s-erkek-indirim-l10847.html?v1=2439352"
 STATE_FILE = "zara_state.json"
-TO_EMAIL = "karakulahka@gmail.com"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147 Safari/537.36",
@@ -37,11 +35,12 @@ def fetch_products():
 
 
 def send_mail(new_products):
-    password = os.environ["GMAIL_APP_PASSWORD"]
+    email_address = os.environ["EMAIL_ADDRESS"]
+    password = os.environ["EMAIL_PASSWORD"]
     msg = EmailMessage()
     msg["Subject"] = f"🚨 Zara İndirim: {len(new_products)} yeni ürün"
-    msg["From"] = TO_EMAIL
-    msg["To"] = TO_EMAIL
+    msg["From"] = email_address
+    msg["To"] = email_address
     lines = ["Zara erkek indirim bölümüne yeni ürün geldi!", "", ZARA_URL, ""]
     for url, name in new_products[:30]:
         lines.append(f"• {name}")
@@ -49,7 +48,7 @@ def send_mail(new_products):
         lines.append("")
     msg.set_content("\n".join(lines))
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login(TO_EMAIL, password)
+        smtp.login(email_address, password)
         smtp.send_message(msg)
 
 
