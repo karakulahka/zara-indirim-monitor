@@ -1,0 +1,37 @@
+name: Zara Indirim Monitor
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check Zara
+        env:
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python zara_monitor.py
+
+      - name: Save product state
+        run: |
+          git config user.name "zara-indirim-monitor"
+          git config user.email "actions@users.noreply.github.com"
+          git add zara_state.json
+          git diff --cached --quiet || git commit -m "Update Zara product state"
+          git push
